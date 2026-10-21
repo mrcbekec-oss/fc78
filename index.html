@@ -84,7 +84,7 @@ select{font:inherit;background:var(--card);color:var(--ink);border:1px solid var
 </div>
 
 <p class="hint">Bir slota dokun, sonra aşağıdan kart seç. Kart kendi mevkiinde oynamazsa reyting düşer. Boş kalan slotlara 68 reytingli yedek oyuncu gelir. Efsane kartlar paketten çıkar.</p>
-<div class="packbar"><img id="packimg" alt="2X 84+ Gold Players Pack"><div class="t"><b>2X 84+ Gold Players Pack</b><span id="pk">0 paket</span> · efsane kartlar paketten çıkar, maç kazanınca yeni paket gelir</div><button id="open">Paketi aç</button></div>
+<div class="packbar"><img id="packimg" alt="2X 84+ Gold Players Pack"><div class="t"><b>2X 84+ Gold Players Pack</b><span id="pk">0 paket</span> · Her pakette en az bir 90+ kart; maç kazanınca yeni paket gelir</div><button id="open">Paketi aç</button></div>
 <div class="bench" id="bench"></div>
 </main>
 
@@ -157,7 +157,7 @@ const SL=[
 {k:"LB",g:"def",r:2},{k:"CB",g:"def",r:2},{k:"CB",g:"def",r:2},{k:"RB",g:"def",r:2},
 {k:"GK",g:"gk",r:3}
 ];
-const NEW=[...C.slice(0,29),...C.slice(37)].map(c=>c.id), wt=o=>o>=95?1:o>=94?2:o>=93?4:o>=91?8:o>=90?12:16;
+const NEW=[...C.slice(0,29),...C.slice(37)].map(c=>c.id), wt=o=>o>=99?10:o>=97?8:o>=95?6:o>=93?4:o>=90?3:1;
 let owned=new Set([29,30,31,32,33,34,35,36]), packs=3, savedTeam=null;
 try{const s=JSON.parse(localStorage.getItem("iconligi2")||"null");if(s){owned=new Set(s.o);packs=s.p;savedTeam=Array.isArray(s.t)?s.t:null}}catch(e){}
 function save(){try{localStorage.setItem("iconligi2",JSON.stringify({o:[...owned],p:packs,t:team.map(c=>c?c.id:null)}))}catch(e){}}
@@ -272,11 +272,11 @@ $("play").onclick=()=>{
     }
   },110);
 };
-function draw(){let t=NEW.reduce((s,i)=>s+wt(C[i].o),0),r=Math.random()*t;for(const i of NEW){r-=wt(C[i].o);if(r<0)return i}return NEW[0]}
+function draw(min=0,exclude=-1){const pool=NEW.filter(i=>i!==exclude&&C[i].o>=min);let r=Math.random()*pool.reduce((s,i)=>s+wt(C[i].o),0);for(const i of pool){r-=wt(C[i].o);if(r<0)return i}return pool[0]}
 $("packimg").src=PACK;
 $("open").onclick=()=>{
   if(busy||packs<1)return;
-  packs--;const a=draw();let b=draw();while(b===a)b=draw();
+  packs--;const a=draw(90),b=draw(0,a);
   const ov=$("ov"),io=$("ovin");ov.classList.add("on");
   io.innerHTML=`<img class="shake" src="${PACK}" alt="Paket açılıyor">`;
   setTimeout(()=>{
