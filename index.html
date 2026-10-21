@@ -84,7 +84,7 @@ select{font:inherit;background:var(--card);color:var(--ink);border:1px solid var
 </div>
 
 <p class="hint">Bir slota dokun, sonra aşağıdan kart seç. Kart kendi mevkiinde oynamazsa reyting düşer. Boş kalan slotlara 68 reytingli yedek oyuncu gelir. Efsane kartlar paketten çıkar.</p>
-<div class="packbar"><img id="packimg" alt="2X 84+ Gold Players Pack"><div class="t"><b>2X 84+ Gold Players Pack</b><span id="pk">0 paket</span> · Her pakette en az bir 90+ kart; maç kazanınca yeni paket gelir</div><button id="open">Paketi aç</button></div>
+<div class="packbar"><img id="packimg" alt="2X 84+ Gold Players Pack"><div class="t"><b>2X 84+ Gold Players Pack</b><span id="pk">0 paket</span> · Her pakette en az bir 88+ kart; maç kazanınca yeni paket gelir</div><button id="open">Paketi aç</button></div>
 <div class="bench" id="bench"></div>
 </main>
 
@@ -276,7 +276,7 @@ function draw(min=0,exclude=-1){const pool=NEW.filter(i=>i!==exclude&&C[i].o>=mi
 $("packimg").src=PACK;
 $("open").onclick=()=>{
   if(busy||packs<1)return;
-  packs--;const a=draw(90),b=draw(0,a);
+  packs--;const a=draw(88),b=draw(0,a);
   const ov=$("ov"),io=$("ovin");ov.classList.add("on");
   io.innerHTML=`<img class="shake" src="${PACK}" alt="Paket açılıyor">`;
   setTimeout(()=>{
