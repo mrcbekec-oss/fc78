@@ -93,7 +93,7 @@ select{font:inherit;background:var(--card);color:var(--ink);border:1px solid var
 </div>
 
 <p class="hint">Bir slota dokun, sonra aşağıdan kart seç. Kart kendi mevkiinde oynamazsa reyting düşer. Boş kalan slotlara 68 reytingli yedek oyuncu gelir. Efsane kartlar paketten çıkar, bazı kartlar yalnızca mağazadan alınır.</p>
-<div class="packbar"><img id="packimg" alt="2X 84+ Gold Players Pack"><div class="t"><b>2X 84+ Gold Players Pack</b><span id="pk">0 paket</span> · efsane kartlar paketten çıkar, maç kazanınca yeni paket gelir</div><button id="open">Paketi aç</button></div>
+<div class="packbar"><img id="packimg" alt="2X 84+ Gold Players Pack"><div class="t"><b>2X 84+ Gold Players Pack</b><span id="pk">0 paket</span> · Her pakette en az 84 reytingli iki farklı kart çıkar; maç kazanınca yeni paket gelir</div><button id="open">Paketi aç</button></div>
 <section class="store" aria-label="Mağaza"><h2>Mağaza <span class="cn"><img class="ci" alt="coin"><b id="cn2">0</b></span></h2><p class="hint">Maç kazandıkça coin kazanırsın. Zorluk arttıkça ödül büyür.</p><div class="shop" id="shop"></div></section>
 <div class="bench" id="bench"></div>
 </main>
@@ -311,11 +311,11 @@ $("play").onclick=()=>{
     }
   },110);
 };
-function draw(){let t=NEW.reduce((s,i)=>s+wt(C[i].o),0),r=Math.random()*t;for(const i of NEW){r-=wt(C[i].o);if(r<0)return i}return NEW[0]}
+function draw(exclude=-1){const pool=NEW.filter(i=>i!==exclude&&C[i].o>=84);let t=pool.reduce((s,i)=>s+wt(C[i].o),0),r=Math.random()*t;for(const i of pool){r-=wt(C[i].o);if(r<0)return i}return pool[pool.length-1]}
 $("packimg").src=PACK;
 $("open").onclick=()=>{
   if(busy||packs<1)return;
-  packs--;const a=draw();let b=draw();while(b===a)b=draw();
+  packs--;const a=draw(),b=draw(a);
   const ov=$("ov"),io=$("ovin");ov.classList.add("on");
   io.innerHTML=`<img class="shake" src="${PACK}" alt="Paket açılıyor">`;
   setTimeout(()=>{
