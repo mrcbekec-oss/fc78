@@ -228,7 +228,7 @@ const SL=[
 // Mağaza: yalnızca coin ile alınır, paketten çıkmaz
 const STORE=[{id:54,price:85700},{id:53,price:150000},{id:52,price:250000},{id:51,price:350000}];
 const REW={72:10000,82:25000,90:50000,97:100000};
-const UT0=74, UTI=Array.from({length:36},(_,i)=>UT0+i), uwt=i=>C[i].o>=99?2:3, UTP=500000;
+const UT0=74, UTI=Array.from({length:36},(_,i)=>UT0+i), uwt=i=>C[i].o>=99?2:3, UTP=250000;
 const NEW=[...C.slice(0,29),...C.slice(37,74)].map(c=>c.id).filter(i=>!STORE.some(x=>x.id===i)), wt=o=>o>=95?1:o>=94?2:o>=93?4:o>=91?8:o>=90?12:16;
 const PACK_WINDOW={start:18*60+10,end:18*60+50}, UT_PACK_WINDOW={start:18*60,end:18*60+50};
 let owned=new Set([29,30,31,32,33,34,35,36]), packs=3, coins=0, upacks=1;
