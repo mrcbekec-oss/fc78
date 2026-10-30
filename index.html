@@ -46,7 +46,7 @@ button:focus-visible,.card:focus-visible,.slot:focus-visible{outline:3px solid v
 .res{text-align:center;font-size:18px;margin:10px 0 2px;font-weight:700}
 select{font:inherit;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px}
 .packbar{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;margin:14px 0 10px}
-.packbar img{height:84px;width:auto;border-radius:6px}.packbar .t{flex:1;font-size:14px;color:var(--mut)}.packbar .t b{display:block;font-size:16px;color:var(--gold2)}
+.packbar img{height:84px;width:auto;border-radius:6px}.packbar .t{flex:1;font-size:14px;color:var(--mut)}.packbar .t b{display:block;font-size:16px;color:var(--gold2)}.packbar .t .pack-time{display:block;margin-top:3px;color:var(--gold2);font-size:12px}
 #ov{position:fixed;inset:0;background:#000d;display:none;align-items:center;justify-content:center;z-index:9;padding:16px}#ov.on{display:flex}
 #ovin{text-align:center;max-width:520px;width:100%}#ovin>img{height:260px;width:auto}
 .shake{animation:shake .45s 2}@keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-7deg)}75%{transform:rotate(7deg)}}
@@ -93,9 +93,9 @@ select{font:inherit;background:var(--card);color:var(--ink);border:1px solid var
 </div>
 
 <p class="hint">Bir slota dokun, sonra aşağıdan kart seç. Kart kendi mevkiinde oynamazsa reyting düşer. Boş kalan slotlara 68 reytingli yedek oyuncu gelir. Efsane kartlar paketten çıkar, bazı kartlar yalnızca mağazadan alınır.</p>
-<div class="packbar"><img id="packimg" alt="2X 84+ Gold Players Pack"><div class="t"><b>2X 84+ Gold Players Pack</b><span id="pk">0 paket</span> · efsane kartlar paketten çıkar, maç kazanınca yeni paket gelir</div><button id="open">Paketi aç</button></div>
+<div class="packbar"><img id="packimg" alt="2X 84+ Gold Players Pack"><div class="t"><b>2X 84+ Gold Players Pack</b><span id="pk">0 paket</span> · efsane kartlar paketten çıkar, maç kazanınca yeni paket gelir<span class="pack-time" id="pkTime"></span></div><button id="open">Paketi aç</button></div>
 <section class="store" aria-label="Mağaza"><h2>Mağaza <span class="cn"><img class="ci" alt="coin"><b id="cn2">0</b></span></h2><p class="hint">Maç kazandıkça coin kazanırsın. Zorluk arttıkça ödül büyür.</p><div class="shop" id="shop"></div></section>
-<div class="packbar"><img id="packimg2" alt="Ultimate Team Paketi"><div class="t"><b>Ultimate Team Paketi</b><span id="pk2">0 paket</span> · TOTS: 97 ve 99 reytingli yıldız kartlar yalnızca bu paketten çıkar</div><button id="open2">Paketi aç</button></div>
+<div class="packbar"><img id="packimg2" alt="Ultimate Team Paketi"><div class="t"><b>Ultimate Team Paketi</b><span id="pk2">0 paket</span> · TOTS: 97 ve 99 reytingli yıldız kartlar yalnızca bu paketten çıkar<span class="pack-time" id="pk2Time"></span></div><button id="open2">Paketi aç</button></div>
 <div class="bench" id="bench"></div>
 </main>
 
@@ -230,6 +230,7 @@ const STORE=[{id:54,price:85700},{id:53,price:150000},{id:52,price:250000},{id:5
 const REW={72:10000,82:25000,90:50000,97:100000};
 const UT0=74, UTI=Array.from({length:36},(_,i)=>UT0+i), uwt=i=>C[i].o>=99?2:3, UTP=40000;
 const NEW=[...C.slice(0,29),...C.slice(37,74)].map(c=>c.id).filter(i=>!STORE.some(x=>x.id===i)), wt=o=>o>=95?1:o>=94?2:o>=93?4:o>=91?8:o>=90?12:16;
+const PACK_WINDOW={start:18*60+10,end:18*60+50}, UT_PACK_WINDOW={start:19*60+30,end:19*60+40};
 let owned=new Set([29,30,31,32,33,34,35,36]), packs=3, coins=0, upacks=1;
 try{let s=JSON.parse(localStorage.getItem("iconligi3")||"null");if(!s){const z=JSON.parse(localStorage.getItem("iconligi2")||"null");if(z){const f=i=>i<=36?i:(i>=39&&i<=75?i-2:-1);s={o:z.o.map(f).filter(i=>i>=0),p:z.p,c:z.c,u:z.u}}}if(s){owned=new Set(s.o);packs=s.p;coins=s.c||0;upacks=s.u==null?1:s.u}}catch(e){}
 function save(){try{localStorage.setItem("iconligi3",JSON.stringify({o:[...owned],p:packs,c:coins,u:upacks}))}catch(e){}}
@@ -245,6 +246,29 @@ function pen(c,slot){
   return -18;
 }
 const $=id=>document.getElementById(id);
+function isPackWindowOpen(window,now=new Date()){
+  const minutes=now.getHours()*60+now.getMinutes();
+  return minutes>=window.start&&minutes<window.end;
+}
+function formatPackTime(minutes){
+  return String(Math.floor(minutes/60)).padStart(2,"0")+":"+String(minutes%60).padStart(2,"0");
+}
+function packWindowStatus(window,now=new Date()){
+  const minutes=now.getHours()*60+now.getMinutes();
+  if(isPackWindowOpen(window,now))return "Açık · "+formatPackTime(window.end)+"'e kadar";
+  const today=minutes<window.start;
+  return "Kapalı · "+(today?"Bugün ":"Yarın ")+formatPackTime(window.start)+"'da açılır";
+}
+function renderPackAvailability(){
+  const now=new Date(),packOpen=isPackWindowOpen(PACK_WINDOW,now),utPackOpen=isPackWindowOpen(UT_PACK_WINDOW,now);
+  $("pk").textContent=packs+" paket";$("pk2").textContent=upacks+" paket";
+  $("pkTime").textContent="Her gün 18:10–18:50 (yerel saat). "+packWindowStatus(PACK_WINDOW,now);
+  $("pk2Time").textContent="Her gün 19:30–19:40 (yerel saat). "+packWindowStatus(UT_PACK_WINDOW,now);
+  $("open").disabled=busy||packs<1||!packOpen;
+  $("open2").disabled=busy||upacks<1||!utPackOpen;
+  const utBuy=$("buyUtPack");
+  if(utBuy){utBuy.textContent=!utPackOpen?"19:30–19:40 arasında alınabilir":coins>=UTP?"Paket al":"Coin yetmiyor";utBuy.disabled=busy||!utPackOpen||coins<UTP}
+}
 function render(){
   const P=$("pitch");P.innerHTML="";
   [0,1,2,3].forEach(r=>{
@@ -276,7 +300,7 @@ function render(){
   });
   const st=calc(); $("sA").textContent=st.A;$("sM").textContent=st.M;$("sD").textContent=st.D;
   $("play").disabled=busy;
-  renderStore();$("pk").textContent=packs+" paket";$("open").disabled=busy||packs<1;$("pk2").textContent=upacks+" paket";$("open2").disabled=busy||upacks<1;
+  renderStore();renderPackAvailability();
 }
 function buy(it){
   if(busy||owned.has(it.id)||coins<it.price)return;
@@ -297,8 +321,8 @@ function renderStore(){
   });
   const up=document.createElement("div");up.className="item";
   up.innerHTML=`<img class="cd" style="max-width:110px;margin:0 auto" src="${PACKU}" alt="Ultimate Team Paketi"><div class="pr"><img class="ci" src="${COIN}" alt="coin">${UTP.toLocaleString("tr-TR")}</div>`;
-  const ub=document.createElement("button");ub.textContent=coins>=UTP?"Paket al":"Coin yetmiyor";ub.disabled=busy||coins<UTP;
-  ub.onclick=()=>{if(busy||coins<UTP)return;coins-=UTP;upacks++;save();render()};
+  const ub=document.createElement("button");ub.id="buyUtPack";
+  ub.onclick=()=>{if(busy||!isPackWindowOpen(UT_PACK_WINDOW)||coins<UTP)return;coins-=UTP;upacks++;save();render()};
   up.appendChild(ub);S.appendChild(up);
 }
 function val(c,s,f){const p=c===R?0:pen(c,s.k);return f(c)+p}
@@ -369,7 +393,7 @@ $("play").onclick=()=>{
 function draw(){let t=NEW.reduce((s,i)=>s+wt(C[i].o),0),r=Math.random()*t;for(const i of NEW){r-=wt(C[i].o);if(r<0)return i}return NEW[0]}
 $("packimg").src=PACK;
 $("open").onclick=()=>{
-  if(busy||packs<1)return;
+  if(busy||packs<1||!isPackWindowOpen(PACK_WINDOW))return;
   packs--;const a=draw();let b=draw();while(b===a)b=draw();
   const ov=$("ov"),io=$("ovin");ov.classList.add("on");
   io.innerHTML=`<img class="shake" src="${PACK}" alt="Paket açılıyor">`;
@@ -382,7 +406,7 @@ $("open").onclick=()=>{
 function drawU(){let t=UTI.reduce((s,i)=>s+uwt(i),0),r=Math.random()*t;for(const i of UTI){r-=uwt(i);if(r<0)return i}return UTI[0]}
 $("packimg2").src=PACKU;
 $("open2").onclick=()=>{
-  if(busy||upacks<1)return;
+  if(busy||upacks<1||!isPackWindowOpen(UT_PACK_WINDOW))return;
   upacks--;const a=drawU();let b=drawU();while(b===a)b=drawU();
   const ov=$("ov"),io=$("ovin");ov.classList.add("on");
   io.innerHTML=`<img class="shake" src="${PACKU}" alt="Paket açılıyor">`;
@@ -392,6 +416,7 @@ $("open2").onclick=()=>{
     save();$("ovx").onclick=()=>{ov.classList.remove("on");render()};$("ovx").focus();
   },1000);
 };
+setInterval(renderPackAvailability,15000);
 render();
 </script>
 </body>
