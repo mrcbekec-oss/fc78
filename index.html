@@ -230,7 +230,7 @@ const STORE=[{id:54,price:85700},{id:53,price:150000},{id:52,price:250000},{id:5
 const REW={72:10000,82:25000,90:50000,97:100000};
 const UT0=74, UTI=Array.from({length:36},(_,i)=>UT0+i), uwt=i=>C[i].o>=99?2:3, UTP=40000;
 const NEW=[...C.slice(0,29),...C.slice(37,74)].map(c=>c.id).filter(i=>!STORE.some(x=>x.id===i)), wt=o=>o>=95?1:o>=94?2:o>=93?4:o>=91?8:o>=90?12:16;
-const PACK_WINDOW={start:18*60+10,end:18*60+50}, UT_PACK_WINDOW={start:19*60+30,end:19*60+40};
+const PACK_WINDOW={start:18*60+10,end:18*60+50}, UT_PACK_WINDOW={start:18*60,end:18*60+50};
 let owned=new Set([29,30,31,32,33,34,35,36]), packs=3, coins=0, upacks=1;
 try{let s=JSON.parse(localStorage.getItem("iconligi3")||"null");if(!s){const z=JSON.parse(localStorage.getItem("iconligi2")||"null");if(z){const f=i=>i<=36?i:(i>=39&&i<=75?i-2:-1);s={o:z.o.map(f).filter(i=>i>=0),p:z.p,c:z.c,u:z.u}}}if(s){owned=new Set(s.o);packs=s.p;coins=s.c||0;upacks=s.u==null?1:s.u}}catch(e){}
 function save(){try{localStorage.setItem("iconligi3",JSON.stringify({o:[...owned],p:packs,c:coins,u:upacks}))}catch(e){}}
@@ -263,11 +263,11 @@ function renderPackAvailability(){
   const now=new Date(),packOpen=isPackWindowOpen(PACK_WINDOW,now),utPackOpen=isPackWindowOpen(UT_PACK_WINDOW,now);
   $("pk").textContent=packs+" paket";$("pk2").textContent=upacks+" paket";
   $("pkTime").textContent="Her gün 18:10–18:50 (yerel saat). "+packWindowStatus(PACK_WINDOW,now);
-  $("pk2Time").textContent="Her gün 19:30–19:40 (yerel saat). "+packWindowStatus(UT_PACK_WINDOW,now);
+  $("pk2Time").textContent="Her gün 18:00–18:50 (yerel saat). "+packWindowStatus(UT_PACK_WINDOW,now);
   $("open").disabled=busy||packs<1||!packOpen;
   $("open2").disabled=busy||upacks<1||!utPackOpen;
   const utBuy=$("buyUtPack");
-  if(utBuy){utBuy.textContent=!utPackOpen?"19:30–19:40 arasında alınabilir":coins>=UTP?"Paket al":"Coin yetmiyor";utBuy.disabled=busy||!utPackOpen||coins<UTP}
+  if(utBuy){utBuy.textContent=!utPackOpen?"18:00–18:50 arasında alınabilir":coins>=UTP?"Paket al":"Coin yetmiyor";utBuy.disabled=busy||!utPackOpen||coins<UTP}
 }
 function render(){
   const P=$("pitch");P.innerHTML="";
