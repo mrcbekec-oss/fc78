@@ -100,7 +100,7 @@ select{font:inherit;background:var(--card);color:var(--ink);border:1px solid var
 </div>
 
 <p class="hint">Bir slota dokun, sonra aşağıdan kart seç. Kart kendi mevkiinde oynamazsa reyting düşer. Boş kalan slotlara 68 reytingli yedek oyuncu gelir. Efsane kartlar paketten çıkar, bazı kartlar yalnızca mağazadan alınır.</p>
-<div class="packbar"><img id="packimg" alt="2X 84+ Gold Players Pack"><div class="t"><b>2X 84+ Gold Players Pack</b><span id="pk">0 paket</span> · efsane kartlar paketten çıkar, maç kazanınca yeni paket gelir<span class="pack-time" id="pkTime"></span></div><button id="open">Paketi aç</button></div>
+<div class="packbar"><img id="packimg" alt="2X 84+ Gold Players Pack"><div class="t"><b>2X 84+ Gold Players Pack</b><span id="pk">0 paket</span> · efsane kartlar paketten çıkar, maç kazanınca yeni paket gelir</div><button id="open">Paketi aç</button></div>
 <section class="store" aria-label="Mağaza"><h2>Mağaza <span class="cn"><img class="ci" alt="coin"><b id="cn2">0</b></span></h2><p class="hint">Maç kazandıkça coin kazanırsın. Zorluk arttıkça ödül büyür.</p><div class="shop" id="shop"></div></section>
 <div class="packbar"><img id="packimg2" alt="Ultimate Team Paketi"><div class="t"><b>Ultimate Team Paketi</b><span id="pk2">0 paket</span> · TOTS: 97 ve 99 reytingli yıldız kartlar yalnızca bu paketten çıkar<span class="pack-time" id="pk2Time"></span></div><button id="open2">Paketi aç</button></div>
 <div class="bench" id="bench"></div>
@@ -237,7 +237,7 @@ const STORE=[{id:54,price:85700},{id:53,price:150000},{id:52,price:250000},{id:5
 const REW={72:10000,82:25000,90:50000,97:100000};
 const UT0=74, UTI=Array.from({length:36},(_,i)=>UT0+i), uwt=i=>C[i].o>=99?2:3, UTP=250000;
 const NEW=[...C.slice(0,29),...C.slice(37,74)].map(c=>c.id).filter(i=>!STORE.some(x=>x.id===i)), wt=o=>o>=95?1:o>=94?2:o>=93?4:o>=91?8:o>=90?12:16;
-const PACK_WINDOW={start:18*60+10,end:18*60+50}, UT_PACK_WINDOW={start:18*60,end:18*60+50};
+const UT_PACK_WINDOW={start:18*60,end:18*60+50};
 let owned=new Set([29,30,31,32,33,34,35,36]), packs=3, coins=0, upacks=1;
 try{let s=JSON.parse(localStorage.getItem("iconligi3")||"null");if(!s){const z=JSON.parse(localStorage.getItem("iconligi2")||"null");if(z){const f=i=>i<=36?i:(i>=39&&i<=75?i-2:-1);s={o:z.o.map(f).filter(i=>i>=0),p:z.p,c:z.c,u:z.u}}}if(s){owned=new Set(s.o);packs=s.p;coins=s.c||0;upacks=s.u==null?1:s.u}}catch(e){}
 function save(){try{localStorage.setItem("iconligi3",JSON.stringify({o:[...owned],p:packs,c:coins,u:upacks}))}catch(e){}}
@@ -267,11 +267,10 @@ function packWindowStatus(window,now=new Date()){
   return "Kapalı · "+(today?"Bugün ":"Yarın ")+formatPackTime(window.start)+"'da açılır";
 }
 function renderPackAvailability(){
-  const now=new Date(),packOpen=isPackWindowOpen(PACK_WINDOW,now),utPackOpen=isPackWindowOpen(UT_PACK_WINDOW,now);
+  const now=new Date(),utPackOpen=isPackWindowOpen(UT_PACK_WINDOW,now);
   $("pk").textContent=packs+" paket";$("pk2").textContent=upacks+" paket";
-  $("pkTime").textContent="Her gün 18:10–18:50 (yerel saat). "+packWindowStatus(PACK_WINDOW,now);
   $("pk2Time").textContent="Her gün 18:00–18:50 (yerel saat). "+packWindowStatus(UT_PACK_WINDOW,now);
-  $("open").disabled=busy||packs<1||!packOpen;
+  $("open").disabled=busy||packs<1;
   $("open2").disabled=busy||upacks<1||!utPackOpen;
   const utBuy=$("buyUtPack");
   if(utBuy){utBuy.textContent=!utPackOpen?"18:00–18:50 arasında alınabilir":coins>=UTP?"Paket al":"Coin yetmiyor";utBuy.disabled=busy||!utPackOpen||coins<UTP}
@@ -400,7 +399,7 @@ $("play").onclick=()=>{
 function draw(){let t=NEW.reduce((s,i)=>s+wt(C[i].o),0),r=Math.random()*t;for(const i of NEW){r-=wt(C[i].o);if(r<0)return i}return NEW[0]}
 $("packimg").src=PACK;
 $("open").onclick=()=>{
-  if(busy||packs<1||!isPackWindowOpen(PACK_WINDOW))return;
+  if(busy||packs<1)return;
   packs--;const a=draw();let b=draw();while(b===a)b=draw();
   const ov=$("ov"),io=$("ovin");ov.classList.add("on");
   io.innerHTML=`<img class="shake" src="${PACK}" alt="Paket açılıyor">`;
